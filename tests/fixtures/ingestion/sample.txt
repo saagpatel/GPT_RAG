@@ -1,0 +1,4 @@
+Plain Text Fixture
+
+This is a plain text fixture.
+It has a second paragraph for parsing.

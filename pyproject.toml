@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gpt-rag"
+version = "0.1.0"
+description = "Local-only personal RAG scaffold for macOS."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [
+  { name = "Personal project scaffold" },
+]
+dependencies = [
+  "beautifulsoup4>=4.12.3",
+  "fastapi>=0.116.1",
+  "lancedb>=0.29.2",
+  "lxml>=5.4.0",
+  "ollama>=0.6.1",
+  "platformdirs>=4.3.8",
+  "pydantic>=2.11.1",
+  "pydantic-settings>=2.8.1",
+  "pypdf>=5.4.0",
+  "rich>=14.0.0",
+  "typer>=0.16.0",
+  "uvicorn>=0.35.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.5",
+  "pytest-mock>=3.14.0",
+  "ruff>=0.11.2",
+]
+reranker = [
+  "sentence-transformers>=5.3.0",
+]
+desktop = [
+  "pyinstaller>=6.15.0",
+]
+
+[project.scripts]
+gpt-rag = "gpt_rag.cli:main"
+rag = "gpt_rag.cli:main"
+gpt-rag-api = "gpt_rag.gui_api:main"
+gpt-rag-worker = "gpt_rag.gui_worker:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/gpt_rag"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

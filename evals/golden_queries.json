@@ -1,0 +1,39 @@
+[
+  {
+    "id": "socket-timeout",
+    "query": "socket timeout during startup",
+    "relevant_sources": ["socket_timeout_guide.md"],
+    "relevant_chunk_substrings": ["socket timeout during startup"],
+    "required_citation_sources": ["socket_timeout_guide.md"]
+  },
+  {
+    "id": "socket-timeout-exact-title",
+    "query": "Socket Timeout Guide",
+    "relevant_sources": ["socket_timeout_guide.md"],
+    "relevant_chunk_substrings": [],
+    "expected_top_source": "socket_timeout_guide.md",
+    "required_citation_sources": ["socket_timeout_guide.md"]
+  },
+  {
+    "id": "widget-indexing",
+    "query": "local widget indexing",
+    "relevant_sources": ["widget_indexing.md"],
+    "relevant_chunk_substrings": ["supports local indexing"],
+    "required_citation_sources": ["widget_indexing.md"]
+  },
+  {
+    "id": "html-cleaning",
+    "query": "strip navigation from html",
+    "relevant_sources": ["html_cleaning.md"],
+    "relevant_chunk_substrings": ["strip navigation chrome from html"],
+    "required_citation_sources": ["html_cleaning.md"]
+  },
+  {
+    "id": "local-breadth",
+    "query": "local",
+    "relevant_sources": ["socket_timeout_guide.md", "widget_indexing.md"],
+    "relevant_chunk_substrings": [],
+    "min_unique_sources_at_k": 2,
+    "required_citation_sources": ["socket_timeout_guide.md", "widget_indexing.md"]
+  }
+]
