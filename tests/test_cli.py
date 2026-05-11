@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -653,11 +654,15 @@ def test_reindex_vectors_status_can_save_report(tmp_path: Path, monkeypatch) -> 
     assert saved_report["status"] == "status"
 
 
+_ANSI_ESCAPE_RE = re.compile(r"\x1b\[[0-9;]*m")
+
+
 def test_reindex_vectors_status_rejects_mutating_flags() -> None:
     result = runner.invoke(app, ["reindex-vectors", "--status", "--batch-size", "2"])
 
     assert result.exit_code == 2
-    assert "--status cannot be combined" in result.output
+    stripped_output = _ANSI_ESCAPE_RE.sub("", result.output)
+    assert "--status cannot be combined" in stripped_output
 
 
 def test_reindex_vectors_status_does_not_create_state_on_fresh_home(
@@ -1010,9 +1015,7 @@ def test_diff_command_compares_saved_trace_to_current_results(tmp_path: Path, mo
     reranker.scores_by_text[
         "# Socket Timeout Guide\n\nSocket timeout troubleshooting and startup checks."
     ] = 0.7
-    reranker.scores_by_text[
-        "Socket Notes\n\nThe socket timeout happens during startup."
-    ] = 0.99
+    reranker.scores_by_text["Socket Notes\n\nThe socket timeout happens during startup."] = 0.99
 
     diff_result = runner.invoke(
         app,
@@ -1114,9 +1117,7 @@ def test_ask_command_can_persist_trace_artifact(tmp_path: Path, monkeypatch) -> 
     assert trace_payload["retrieval_snapshot"]["diversity"]["document_capped_count"] >= 0
     assert trace_payload["retrieval_snapshot"]["diversity"]["unique_document_count"] >= 1
     assert trace_payload["retrieval_results"]
-    assert (
-        trace_payload["generated_answer"]["retrieval_summary"]["cited_chunk_count"] == 2
-    )
+    assert trace_payload["generated_answer"]["retrieval_summary"]["cited_chunk_count"] == 2
     assert trace_payload["answer_context_diversity"]["used_chunk_count"] == 2
     assert trace_payload["answer_context_diversity"]["unique_document_count"] == 2
     assert trace_payload["generated_answer"]["citations"][0]["chunk_id"] > 0
@@ -1262,9 +1263,7 @@ def test_answer_diff_command_compares_ask_traces(tmp_path: Path, monkeypatch) ->
     reranker.scores_by_text[
         "# Socket Timeout Guide\n\nSocket timeout troubleshooting and startup checks."
     ] = 0.7
-    reranker.scores_by_text[
-        "Socket Notes\n\nThe socket timeout happens during startup."
-    ] = 0.99
+    reranker.scores_by_text["Socket Notes\n\nThe socket timeout happens during startup."] = 0.99
     monkeypatch.setattr("gpt_rag.cli.build_generation_client", lambda settings: after_generator)
 
     after_result = runner.invoke(
@@ -2397,18 +2396,21 @@ def test_trace_verify_reports_invalid_artifacts(tmp_path: Path, monkeypatch) -> 
         issues_by_path = {
             Path(report["path"]).name: report["issues"] for report in payload["reports"]
         }
-        assert "could not read a JSON object" in issues_by_path[
-            "20260101T000000Z-inspect-broken.json"
-        ]
-        assert "ask trace must contain generated_answer" in issues_by_path[
-            "20260101T000100Z-ask-wrong.json"
-        ]
-        assert "ask trace must contain retrieval_snapshot" in issues_by_path[
-            "20260101T000100Z-ask-wrong.json"
-        ]
-        assert "ask trace must contain retrieval_results" in issues_by_path[
-            "20260101T000100Z-ask-wrong.json"
-        ]
+        assert (
+            "could not read a JSON object" in issues_by_path["20260101T000000Z-inspect-broken.json"]
+        )
+        assert (
+            "ask trace must contain generated_answer"
+            in issues_by_path["20260101T000100Z-ask-wrong.json"]
+        )
+        assert (
+            "ask trace must contain retrieval_snapshot"
+            in issues_by_path["20260101T000100Z-ask-wrong.json"]
+        )
+        assert (
+            "ask trace must contain retrieval_results"
+            in issues_by_path["20260101T000100Z-ask-wrong.json"]
+        )
     finally:
         load_settings.cache_clear()
 
