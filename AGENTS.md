@@ -1,5 +1,14 @@
 # AGENTS.md
 
+<!-- comm-contract:start -->
+## Communication Contract (Global)
+- Follow `/Users/d/.codex/policies/communication/BigPictureReportingV1.md` for all user-facing updates.
+- Use exact section labels from `BigPictureReportingV1.md` for default status/progress updates.
+- Keep default updates beginner-friendly, big-picture, and low-noise.
+- Keep technical details in internal artifacts unless explicitly requested by the user.
+- Honor toggles literally: `simple mode`, `show receipts`, `tech mode`, `debug mode`.
+<!-- comm-contract:end -->
+
 ## Project goal
 
 Build a personal, local-only RAG system for macOS with a CLI-first workflow. The system must remain simple, inspectable, and testable from day one.
@@ -75,6 +84,16 @@ ruff check . --fix
 - When a dependency is optional or heavyweight, isolate it behind a module boundary
 - Treat `ingestion_runs` as SQLite-inspectable operational history unless a task explicitly adds a first-class CLI view for them
 
+## Codex App Usage
+
+- Use Codex App Projects for repo-specific implementation, review, and verification in this checkout.
+- Use a Worktree when changing retrieval behavior, storage schemas, CLI contracts, desktop wiring, or model-runtime boundaries.
+- Use the in-app browser or Playwright for desktop UI and FastAPI-backed browser workflow checks.
+- Use computer use only for GUI-only macOS/Tauri behavior that cannot be verified through tests, browser tooling, MCP, or CLI commands.
+- Use artifacts for reusable evaluation notes, retrieval examples, screenshots, and handoff packets.
+- Keep connectors read-first and task-scoped. Do not introduce cloud services, hosted databases, external API keys, or connector-backed app behavior unless explicitly requested.
+- Keep `.codex/verify.commands` as the verification authority; Codex App tools add evidence but do not replace the required local gates.
+
 ## Done criteria
 
 A task is done only when all of the following are true:
@@ -83,3 +102,46 @@ A task is done only when all of the following are true:
 - Relevant tests were run, or the exact reason they were not run is stated
 - Docs or repo rules were updated when behavior or workflow changed
 - Assumptions, risks, and next steps were summarized
+
+<!-- portfolio-context:start -->
+# Portfolio Context
+
+## What This Project Is
+
+GPT_RAG is an active local project in the /Users/d/Projects portfolio.
+
+## Current State
+
+Portfolio truth currently marks this project as `recent` with `boilerplate` context. Phase 104 recovered minimum-viable context so future sessions can resume without rediscovery.
+
+## Stack
+
+| Layer | Technology |
+|-------|------------|
+| Language | Python 3.11+ |
+| CLI | Typer + Rich |
+| Database | SQLite (FTS5) + LanceDB |
+| Embeddings / inference | Ollama |
+| Reranker | sentence-transformers (Qwen3-Reranker-4B) |
+| Document parsing | pypdf, BeautifulSoup4 |
+| Desktop shell | Tauri v2 + React + TypeScript |
+| Desktop API | FastAPI + Uvicorn |
+| Validation | Pydantic v2 |
+
+## How To Run
+
+```bash
+rag init
+rag ingest ~/Documents/my-notes
+rag ask "What did I write about distributed systems?"
+```
+
+## Known Risks
+
+- This repo only has minimum-viable recovery context today; deeper handoff details may still live in the README and supporting docs.
+
+## Next Recommended Move
+
+Use this context plus the README and supporting docs to resume the next active task, then promote the repo beyond minimum-viable by capturing a dedicated handoff, roadmap, or discovery artifact.
+
+<!-- portfolio-context:end -->
