@@ -168,15 +168,14 @@ def gather_doctor_report(settings: Settings) -> dict[str, object]:
             ollama_report["generator_model_available"] = (
                 settings.generator_model in available_models
             )
-        except RequestError as exc:
+        except RequestError:
             ollama_report["error"] = (
-                f"Ollama is unreachable at {settings.ollama_base_url}: {exc}. "
-                "Start it locally and retry."
+                f"Ollama is unreachable at {settings.ollama_base_url}. Start it locally and retry."
             )
-        except ResponseError as exc:
-            ollama_report["error"] = f"Ollama responded with an error: {exc}"
-        except Exception as exc:  # pragma: no cover - defensive fallback
-            ollama_report["error"] = f"Unexpected Ollama diagnostic error: {exc}"
+        except ResponseError:
+            ollama_report["error"] = "Ollama responded with an error. Check local runtime logs."
+        except Exception:  # pragma: no cover - defensive fallback
+            ollama_report["error"] = "Unexpected Ollama diagnostic error. Check local runtime logs."
 
     reranker_cache = inspect_reranker_cache(settings.reranker_model)
     runtime_ready = bool(

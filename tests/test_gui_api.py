@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 from fastapi.testclient import TestClient
+from ollama import RequestError
 
 from gpt_rag.config import Settings
 from gpt_rag.db import append_gui_job_event, create_gui_job, open_database
 from gpt_rag.gui_api import _require_session_token, _validate_loopback_host, create_app
 from gpt_rag.gui_backend import _managed_trace_artifact_path
+from gpt_rag.reranking import RerankerCacheReport
 
 
 def test_health_endpoint_requires_session_token(monkeypatch) -> None:
@@ -24,6 +27,40 @@ def test_health_endpoint_requires_session_token(monkeypatch) -> None:
     authorized = client.get("/health", headers={"x-gpt-rag-session-token": "secret"})
     assert authorized.status_code == 200
     assert authorized.json()["runtime_ready"] is True
+
+
+def test_health_endpoint_sanitizes_ollama_errors(monkeypatch, tmp_path) -> None:
+    class FakeClient:
+        def __init__(self, host: str) -> None:
+            self.host = host
+
+        def list(self) -> object:
+            raise RequestError("connection refused at /private/tmp/ollama.sock")
+
+    monkeypatch.setattr("gpt_rag.gui_backend.Client", FakeClient)
+    monkeypatch.setattr(
+        "gpt_rag.gui_backend.inspect_reranker_cache",
+        lambda model_name: RerankerCacheReport(
+            model_name=model_name,
+            cache_root=Path("/tmp/cache"),
+            repo_path=Path("/tmp/cache/models--Qwen--Qwen3-Reranker-4B"),
+            snapshot_path=Path("/tmp/cache/models--Qwen--Qwen3-Reranker-4B/snapshots/abc"),
+            available=False,
+            missing_files=[],
+            incomplete_files=[],
+        ),
+    )
+    app = create_app(settings=Settings(home_dir=tmp_path / "gui-home"), session_token="secret")
+    client = TestClient(app)
+
+    response = client.get("/health", headers={"x-gpt-rag-session-token": "secret"})
+
+    assert response.status_code == 200
+    assert response.json()["ollama"]["error"] == (
+        "Ollama is unreachable at http://127.0.0.1:11434. Start it locally and retry."
+    )
+    assert "connection refused" not in response.text
+    assert "/private/tmp/ollama.sock" not in response.text
 
 
 def test_init_and_job_lifecycle_endpoints() -> None:

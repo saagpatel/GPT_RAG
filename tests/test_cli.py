@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
+from ollama import RequestError
 from typer.testing import CliRunner
 
 from gpt_rag.cli import app
@@ -159,6 +160,39 @@ def test_doctor_command_flags_non_local_ollama_endpoint(monkeypatch) -> None:
     payload = json.loads(result.output)
     assert payload["ollama"]["is_local_endpoint"] is False
     assert "not local-only" in payload["ollama"]["error"]
+
+
+def test_doctor_command_sanitizes_ollama_request_errors(monkeypatch) -> None:
+    class FakeClient:
+        def __init__(self, host: str) -> None:
+            self.host = host
+
+        def list(self) -> object:
+            raise RequestError("connection refused at /private/tmp/ollama.sock")
+
+    monkeypatch.setattr("gpt_rag.cli.Client", FakeClient)
+    monkeypatch.setattr(
+        "gpt_rag.cli.inspect_reranker_cache",
+        lambda model_name: RerankerCacheReport(
+            model_name=model_name,
+            cache_root=Path("/tmp/cache"),
+            repo_path=Path("/tmp/cache/models--Qwen--Qwen3-Reranker-4B"),
+            snapshot_path=Path("/tmp/cache/models--Qwen--Qwen3-Reranker-4B/snapshots/abc"),
+            available=False,
+            missing_files=[],
+            incomplete_files=[],
+        ),
+    )
+
+    result = runner.invoke(app, ["doctor", "--json"])
+
+    assert result.exit_code == 0
+    payload = json.loads(result.output)
+    assert payload["ollama"]["error"] == (
+        "Ollama is unreachable at http://127.0.0.1:11434. Start it locally and retry."
+    )
+    assert "connection refused" not in result.output
+    assert "/private/tmp/ollama.sock" not in result.output
 
 
 def test_doctor_command_prints_reranker_cache_and_runtime_ready(monkeypatch) -> None:
@@ -2684,4 +2718,5 @@ def test_doctor_command_human_output_is_actionable(monkeypatch) -> None:
     assert result.exit_code == 0
     assert "GPT_RAG doctor" in result.output
     assert "Ollama reachability" in result.output
-    assert "connection refused" in result.output
+    assert "Unexpected Ollama diagnostic error. Check" in result.output
+    assert "connection refused" not in result.output
