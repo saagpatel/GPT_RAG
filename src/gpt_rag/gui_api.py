@@ -194,9 +194,9 @@ def create_app(*, settings: Settings | None = None, session_token: str | None = 
         try:
             payload = load_trace_artifact(app.state.settings, trace_type=trace_type, name=name)
         except FileNotFoundError as exc:
-            raise HTTPException(status_code=404, detail=f"Trace not found: {exc}") from exc
+            raise HTTPException(status_code=404, detail="Trace not found.") from exc
         except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc)) from exc
+            raise HTTPException(status_code=400, detail="Invalid trace request.") from exc
         return to_jsonable(payload)
 
     @app.post("/jobs", dependencies=[Depends(guard)])

@@ -115,6 +115,43 @@ def test_managed_trace_artifact_path_rejects_path_traversal(tmp_path) -> None:
         raise AssertionError("Expected trace path traversal to be rejected.")
 
 
+def test_trace_endpoint_sanitizes_missing_trace_errors(tmp_path) -> None:
+    settings = Settings(home_dir=tmp_path / "gui-home")
+    settings.trace_path.mkdir(parents=True, exist_ok=True)
+    app = create_app(settings=settings, session_token="secret")
+    client = TestClient(app)
+
+    response = client.get(
+        "/traces/inspect/20260315T000000Z-inspect-missing.json",
+        headers={"x-gpt-rag-session-token": "secret"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Trace not found."}
+    assert str(settings.trace_path) not in response.text
+
+
+def test_trace_endpoint_sanitizes_invalid_trace_errors(tmp_path) -> None:
+    settings = Settings(home_dir=tmp_path / "gui-home")
+    settings.trace_path.mkdir(parents=True, exist_ok=True)
+    trace_path = settings.trace_path / "20260315T000000Z-ask-mismatch.json"
+    trace_path.write_text(
+        json.dumps({"query": "pgvector", "generated_answer": {}}),
+        encoding="utf-8",
+    )
+    app = create_app(settings=settings, session_token="secret")
+    client = TestClient(app)
+
+    response = client.get(
+        f"/traces/inspect/{trace_path.name}",
+        headers={"x-gpt-rag-session-token": "secret"},
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid trace request."}
+    assert trace_path.name not in response.text
+
+
 def test_jobs_websocket_streams_events() -> None:
     app = create_app(session_token="secret")
     client = TestClient(app)
