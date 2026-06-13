@@ -389,6 +389,26 @@ def test_single_weak_chunk_declines_without_calling_generator() -> None:
     assert answer.retrieval_summary.cited_chunk_count == 0
 
 
+def test_single_exact_match_below_top_lexical_rank_declines_without_generator() -> None:
+    client = FakeGenerationClient(raw_response="should never be read", calls=[])
+
+    answer = generate_grounded_answer(
+        "socket timeout guide",
+        [_hybrid_result(exact_title_match=True, lexical_rank=2, final_rank=2)],
+        generation_client=client,
+    )
+
+    assert client.calls == []
+    assert "not enough support to answer confidently" in answer.answer
+    assert answer.citations == []
+    assert len(answer.used_chunks) == 1
+    assert "A single weakly matched chunk is not enough" in answer.warnings[-1]
+    assert answer.retrieval_summary.generator_called is False
+    assert answer.retrieval_summary.weak_retrieval is True
+    assert answer.retrieval_summary.used_chunk_count == 1
+    assert answer.retrieval_summary.cited_chunk_count == 0
+
+
 def test_weak_retrieval_confident_answer_returns_safe_failure_answer() -> None:
     answer = generate_grounded_answer(
         "socket timeout guide",
