@@ -123,6 +123,50 @@ def test_lexical_eval_report_computes_expected_metrics(
     assert breadth_row.source_diversity_hit == 1.0
 
 
+def test_min_score_threshold_excludes_chunks_from_mrr(
+    eval_fixture_dir: Path,
+    eval_golden_queries_path: Path,
+) -> None:
+    baseline = run_retrieval_eval(
+        settings=load_settings(),
+        mode="lexical",
+        k=3,
+        corpus_path=eval_fixture_dir,
+        golden_queries_path=eval_golden_queries_path,
+    )
+
+    # Default threshold is 0.0, so no chunk is excluded — MRR matches the baseline.
+    explicit_zero = run_retrieval_eval(
+        settings=load_settings(),
+        mode="lexical",
+        k=3,
+        min_score_threshold=0.0,
+        corpus_path=eval_fixture_dir,
+        golden_queries_path=eval_golden_queries_path,
+    )
+    assert baseline.mrr == 1.0
+    assert explicit_zero.mrr == baseline.mrr
+    assert {row.case_id: row.reciprocal_rank for row in explicit_zero.results} == {
+        row.case_id: row.reciprocal_rank for row in baseline.results
+    }
+
+    # A threshold above every relevance score drops all chunks before the MRR
+    # computation, so reciprocal rank collapses to 0 for every query...
+    filtered = run_retrieval_eval(
+        settings=load_settings(),
+        mode="lexical",
+        k=3,
+        min_score_threshold=1e9,
+        corpus_path=eval_fixture_dir,
+        golden_queries_path=eval_golden_queries_path,
+    )
+    assert filtered.mrr == 0.0
+    assert all(row.reciprocal_rank == 0.0 for row in filtered.results)
+    # ...while the filter stays scoped to MRR and leaves the other metrics intact.
+    assert filtered.hit_at_k == baseline.hit_at_k == 1.0
+    assert filtered.recall_at_k == baseline.recall_at_k == 1.0
+
+
 def test_semantic_eval_works_with_fake_backend(
     eval_fixture_dir: Path,
     eval_golden_queries_path: Path,

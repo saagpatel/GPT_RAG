@@ -170,6 +170,7 @@ def run_retrieval_eval(
     mode: EvaluationMode,
     k: int,
     max_results_per_document: int | None = None,
+    min_score_threshold: float = 0.0,
     bundle_case_ids: set[str] | None = None,
     corpus_path: Path = DEFAULT_EVAL_CORPUS_DIR,
     golden_queries_path: Path = DEFAULT_GOLDEN_QUERIES_PATH,
@@ -204,6 +205,7 @@ def run_retrieval_eval(
                     query_case=query_case,
                     k=k,
                     max_results_per_document=max_results_per_document,
+                    min_score_threshold=min_score_threshold,
                     bundle_case_ids=bundle_case_ids,
                     embedding_backend=embedding_backend,
                     reranker=reranker,
@@ -217,18 +219,12 @@ def run_retrieval_eval(
     query_count = len(results)
     hit_at_k = sum(result.hit for result in results) / query_count if query_count else 0.0
     recall_at_k = sum(result.recall for result in results) / query_count if query_count else 0.0
-    mrr = (
-        sum(result.reciprocal_rank for result in results) / query_count if query_count else 0.0
-    )
+    mrr = sum(result.reciprocal_rank for result in results) / query_count if query_count else 0.0
     diversity_results = [
-        result.source_diversity_hit
-        for result in results
-        if result.source_diversity_hit is not None
+        result.source_diversity_hit for result in results if result.source_diversity_hit is not None
     ]
     top_source_results = [
-        result.top_source_hit
-        for result in results
-        if result.top_source_hit is not None
+        result.top_source_hit for result in results if result.top_source_hit is not None
     ]
     return EvalReport(
         mode=mode,
@@ -317,6 +313,7 @@ def _evaluate_query(
     query_case: GoldenQuery,
     k: int,
     max_results_per_document: int | None,
+    min_score_threshold: float,
     bundle_case_ids: set[str] | None,
     embedding_backend: EmbeddingBackend | None,
     reranker: LocalReranker | None,
@@ -347,8 +344,11 @@ def _evaluate_query(
     matched_total = len(matched_sources) + len(matched_chunk_substrings)
     hit = 1.0 if matched_total > 0 else 0.0
     recall = matched_total / expected_total if expected_total else 0.0
+    scored_results = [
+        result for result in results if _relevance_score(result) >= min_score_threshold
+    ]
     reciprocal_rank = _reciprocal_rank(
-        results,
+        scored_results,
         relevant_sources=query_case.relevant_sources,
         relevant_chunk_substrings=query_case.relevant_chunk_substrings,
     )
@@ -380,9 +380,7 @@ def _evaluate_query(
         source_diversity_hit=source_diversity_hit,
     )
     bundle = None
-    if bundle_case_ids is not None and (
-        not bundle_case_ids or query_case.id in bundle_case_ids
-    ):
+    if bundle_case_ids is not None and (not bundle_case_ids or query_case.id in bundle_case_ids):
         bundle = EvalCaseBundle(
             case_id=query_case.id,
             query=query_case.query,
@@ -510,6 +508,21 @@ def _run_query(
     raise ValueError(f"Unsupported evaluation mode: {mode}")
 
 
+def _relevance_score(result) -> float:
+    """Return the score that drove this result's ranking, by mode.
+
+    Lexical results expose ``lexical_score``, semantic results ``semantic_score``,
+    and hybrid results rank by ``reranker_score`` (when reranked) falling back to
+    ``fusion_score``. The precedence below mirrors that ordering so the filter sees
+    the same magnitude that determined each result's position.
+    """
+    for attribute in ("reranker_score", "fusion_score", "semantic_score", "lexical_score"):
+        value = getattr(result, attribute, None)
+        if value is not None:
+            return float(value)
+    return 0.0
+
+
 def _reciprocal_rank(
     results,
     *,
@@ -542,9 +555,7 @@ def _evaluate_answer_expectations(
         failures.append("expected answer to stay grounded, but it declined")
 
     missing_citation_sources = [
-        source
-        for source in query_case.required_citation_sources
-        if source not in citation_sources
+        source for source in query_case.required_citation_sources if source not in citation_sources
     ]
     if missing_citation_sources:
         failures.append(
@@ -557,9 +568,7 @@ def _evaluate_answer_expectations(
         if value.lower() not in rendered_answer
     ]
     if missing_substrings:
-        failures.append(
-            "missing required answer text: " + ", ".join(sorted(missing_substrings))
-        )
+        failures.append("missing required answer text: " + ", ".join(sorted(missing_substrings)))
 
     forbidden_substrings = [
         value
