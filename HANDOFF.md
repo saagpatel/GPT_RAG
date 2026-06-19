@@ -2,22 +2,23 @@
 
 ## Current State
 
-Latest checkpoint: 2026-05-30.
+Latest checkpoint: 2026-06-14.
 
-The repo is on `main` tracking `origin/main`. The Notion packet wording about reconciling the local worktree is stale: no local code changes or branch drift were found before this handoff was added.
+The live worktree check for this checkpoint started clean on branch `test/weak-evidence-decline-path`. This handoff is the durable record of the local-AI runtime repair and verification pass.
 
 GPT_RAG is a local-only personal RAG system with a Python CLI/core, SQLite + FTS5 source of truth, LanceDB vector storage, local Ollama model interfaces, optional sentence-transformer reranking, and a Tauri + React desktop shell.
 
 ## Verified Today
 
-- `uv sync --extra dev --locked` completed and created `.venv`.
+- `uv sync --extra dev --locked` completed.
 - `PYTHONPATH=src uv run python -m ruff check src tests` passed.
-- `PYTHONPATH=src uv run python -m pytest` passed: 192 tests.
-- `PYTHONPATH=src uv run python -m gpt_rag.cli init --json` initialized LanceDB, source-data, and SQLite app-state paths.
+- `PYTHONPATH=src uv run python -m pytest` passed: 197 tests.
 - `ollama pull qwen3-embedding:4b` completed.
 - `ollama pull qwen3:8b` completed.
-- `uv sync --extra dev --extra reranker --locked` completed and installed the optional reranker Python dependencies into `.venv`.
-- `PYTHONPATH=src uv run python -m gpt_rag.cli doctor --json` ran successfully, but still reported `runtime_ready=false` because the Hugging Face reranker model cache is missing.
+- `PYTHONPATH=src uv run python -m gpt_rag.cli doctor --json` ran successfully, with Ollama reachable and both configured Ollama models available.
+- `PYTHONPATH=src uv run python -m gpt_rag.cli eval --mode semantic --json` passed the fixture corpus with `hit_at_k=1.0`, `recall_at_k=1.0`, and `mrr=1.0`.
+- `PYTHONPATH=src uv run python -m gpt_rag.cli runtime-check --json` still returned `status=not_ready` because runtime readiness is gated on the deferred reranker dependency/cache.
+- `PYTHONPATH=src uv run python -m gpt_rag.cli eval --mode hybrid --json` failed for the same reranker dependency boundary.
 - `npm --prefix apps/desktop ci` completed.
 - `cargo test --manifest-path apps/desktop/src-tauri/Cargo.toml` passed: 6 Rust tests.
 - `npm --prefix apps/desktop test` passed: 8 frontend tests.
@@ -32,14 +33,15 @@ GPT_RAG is a local-only personal RAG system with a Python CLI/core, SQLite + FTS
 - Configured embedding model `qwen3-embedding:4b` is available.
 - Configured generator model `qwen3:8b` is available.
 - SQLite state DB exists at `/Users/d/Library/Application Support/gpt-rag/state/rag.db` with all required tables.
-- Optional reranker dependencies are installed.
-- The only remaining doctor warning is the missing local Hugging Face snapshot for `Qwen/Qwen3-Reranker-4B` under `/Users/d/.cache/huggingface/hub`.
+- `runtime_ready=false` because optional reranker dependencies and the local Hugging Face snapshot for `Qwen/Qwen3-Reranker-4B` are not present.
+- Reranker cache root is `/Users/d/.cache/huggingface/hub`; the expected repo path is `/Users/d/.cache/huggingface/hub/models--Qwen--Qwen3-Reranker-4B`.
 
 ## Active Follow-Up
 
-1. Cache `Qwen/Qwen3-Reranker-4B` locally if the next slice needs full hybrid/reranked retrieval readiness.
-2. Re-run `PYTHONPATH=src uv run python -m gpt_rag.cli doctor --json` and expect `runtime_ready=true` after the reranker snapshot is present.
-3. Tests and desktop build do not require the live reranker model cache.
+1. Ask operator approval before installing optional reranker dependencies or caching `Qwen/Qwen3-Reranker-4B`; the model/cache may be large and was intentionally deferred during this repair pass.
+2. After approval, install the reranker extra/cache, then re-run `PYTHONPATH=src uv run python -m gpt_rag.cli doctor --json` and expect `runtime_ready=true`.
+3. Re-run `PYTHONPATH=src uv run python -m gpt_rag.cli runtime-check --json`, `PYTHONPATH=src uv run python -m gpt_rag.cli eval --mode hybrid --json`, and `PYTHONPATH=src uv run python -m gpt_rag.cli eval-answer --json` after the reranker is ready.
+4. Tests, semantic retrieval evals, and desktop build do not require the live reranker model cache.
 
 ## Restart Order
 

@@ -165,6 +165,26 @@ def test_weak_retrieval_calls_generator_and_returns_warning() -> None:
     assert answer.retrieval_summary.generator_called is True
 
 
+def test_single_low_confidence_chunk_declines_without_calling_generator() -> None:
+    client = FakeGenerationClient(raw_response="{}", calls=[])
+
+    answer = generate_grounded_answer(
+        "socket timeout",
+        [_hybrid_result()],
+        generation_client=client,
+    )
+
+    assert client.calls == []
+    assert "not enough support to answer confidently" in answer.answer
+    assert answer.citations == []
+    assert answer.used_chunks[0].chunk_id == 101
+    assert any("single weakly matched chunk" in warning for warning in answer.warnings)
+    assert answer.retrieval_summary.generator_called is False
+    assert answer.retrieval_summary.weak_retrieval is True
+    assert answer.retrieval_summary.used_chunk_count == 1
+    assert answer.retrieval_summary.cited_chunk_count == 0
+
+
 def test_grounded_generation_accepts_valid_cited_model_output() -> None:
     client = FakeGenerationClient(
         raw_response=(
@@ -322,9 +342,7 @@ def test_citations_array_without_inline_markers_returns_safe_failure_answer() ->
         [_hybrid_result(exact_title_match=True)],
         generation_client=FakeGenerationClient(
             raw_response=(
-                '{"answer":"The issue is a socket timeout.",'
-                '"citations":["C1"],'
-                '"warnings":[]}'
+                '{"answer":"The issue is a socket timeout.","citations":["C1"],"warnings":[]}'
             ),
             calls=[],
         ),
