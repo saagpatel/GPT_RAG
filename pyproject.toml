@@ -34,7 +34,7 @@ dev = [
   "ruff>=0.11.2",
 ]
 reranker = [
-  "sentence-transformers>=5.3.0",
+  "sentence-transformers>=5.6.0",
 ]
 desktop = [
   "pyinstaller>=6.15.0",
