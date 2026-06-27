@@ -187,7 +187,7 @@ export function LibraryPage() {
               Add path manually
               <input
                 aria-label="Manual library path"
-                placeholder="/Users/d/Knowledge"
+                placeholder="~/Documents/Knowledge"
                 value={manualPath}
                 onChange={(event) => setManualPath(event.target.value)}
               />
