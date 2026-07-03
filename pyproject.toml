@@ -38,7 +38,7 @@ reranker = [
   "sentence-transformers>=5.3.0",
 ]
 desktop = [
-  "pyinstaller>=6.15.0",
+  "pyinstaller>=6.21.0",
 ]
 
 [project.scripts]
