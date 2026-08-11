@@ -27,7 +27,7 @@ test("LibraryPage queues ingest preview jobs", async () => {
 
   renderWithApp(<LibraryPage />, { api });
 
-  await user.type(screen.getByLabelText("Manual library path"), "/Users/d/Knowledge");
+  await user.type(screen.getByLabelText("Manual library path"), "~/Knowledge");
   await user.click(screen.getByRole("button", { name: "Add path" }));
   await user.click(screen.getByRole("button", { name: "Preview ingest" }));
 
