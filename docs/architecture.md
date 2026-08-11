@@ -71,10 +71,10 @@ Saved answer-eval reports can also be diffed directly, so grounded-answer regres
 GUI v1 is intentionally narrower than the CLI.
 It reuses the same Python backend functions and adds orchestration plus presentation:
 
-- a FastAPI control plane in [src/gpt_rag/gui_api.py](~/Projects/GPT_RAG/src/gpt_rag/gui_api.py)
-- a dedicated worker loop in [src/gpt_rag/gui_worker.py](~/Projects/GPT_RAG/src/gpt_rag/gui_worker.py)
+- a FastAPI control plane in [src/gpt_rag/gui_api.py](../src/gpt_rag/gui_api.py)
+- a dedicated worker loop in [src/gpt_rag/gui_worker.py](../src/gpt_rag/gui_worker.py)
 - persisted GUI jobs and GUI job events in SQLite
-- a Tauri desktop shell in [apps/desktop](~/Projects/GPT_RAG/apps/desktop)
+- a Tauri desktop shell in [apps/desktop](../apps/desktop)
 
 This keeps ingest, inspect, ask, and vector indexing work out of the UI thread and makes job progress reconnectable after restarts.
 For v1, eval and regression tooling remain CLI-only on purpose.
