@@ -4,7 +4,7 @@
 
 ## Communication Contract
 
-- Inherit global Codex communication and reporting rules from `/Users/d/.codex/AGENTS.override.md` and `/Users/d/.codex/policies/communication/BigPictureReportingV1.md`.
+- Inherit global Codex communication and reporting rules from `~/.codex/AGENTS.override.md` and `~/.codex/policies/communication/BigPictureReportingV1.md`.
 - Repo-specific instructions below add project constraints only; do not restate global voice or status-reporting rules here.
 <!-- comm-contract:end -->
 
@@ -107,7 +107,7 @@ A task is done only when all of the following are true:
 
 ## What This Project Is
 
-GPT_RAG is an active local project in the /Users/d/Projects portfolio.
+GPT_RAG is an active local project in the ~/Projects portfolio.
 
 ## Current State
 

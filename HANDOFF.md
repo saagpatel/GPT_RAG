@@ -32,9 +32,9 @@ GPT_RAG is a local-only personal RAG system with a Python CLI/core, SQLite + FTS
 - Available Ollama models: `qwen2.5-coder:14b`, `qwen3-embedding:4b`, and `qwen3:8b`.
 - Configured embedding model `qwen3-embedding:4b` is available.
 - Configured generator model `qwen3:8b` is available.
-- SQLite state DB exists at `/Users/d/Library/Application Support/gpt-rag/state/rag.db` with all required tables.
+- SQLite state DB exists at `~/Library/Application Support/gpt-rag/state/rag.db` with all required tables.
 - `runtime_ready=false` because optional reranker dependencies and the local Hugging Face snapshot for `Qwen/Qwen3-Reranker-4B` are not present.
-- Reranker cache root is `/Users/d/.cache/huggingface/hub`; the expected repo path is `/Users/d/.cache/huggingface/hub/models--Qwen--Qwen3-Reranker-4B`.
+- Reranker cache root is `~/.cache/huggingface/hub`; the expected repo path is `~/.cache/huggingface/hub/models--Qwen--Qwen3-Reranker-4B`.
 
 ## Active Follow-Up
 
