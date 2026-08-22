@@ -1,6 +1,6 @@
 # GUI Personal Release Candidate
 
-The desktop app lives at [apps/desktop](~/Projects/GPT_RAG/apps/desktop).
+The desktop app lives at [apps/desktop](../apps/desktop).
 
 ## Shape
 
@@ -9,7 +9,7 @@ The desktop app lives at [apps/desktop](~/Projects/GPT_RAG/apps/desktop).
 - FastAPI control-plane API
 - dedicated local Python worker
 
-The Python package under [src/gpt_rag](~/Projects/GPT_RAG/src/gpt_rag) remains the source of truth for ingestion, retrieval, grounded answering, traces, and runtime diagnostics.
+The Python package under [src/gpt_rag](../src/gpt_rag) remains the source of truth for ingestion, retrieval, grounded answering, traces, and runtime diagnostics.
 
 ## Core screens
 
@@ -57,7 +57,7 @@ These workflows stay in `rag`:
 
 ### API
 
-Entry point: [src/gpt_rag/gui_api.py](~/Projects/GPT_RAG/src/gpt_rag/gui_api.py)
+Entry point: [src/gpt_rag/gui_api.py](../src/gpt_rag/gui_api.py)
 
 Routes:
 
@@ -75,7 +75,7 @@ Routes:
 
 ### Worker
 
-Entry point: [src/gpt_rag/gui_worker.py](~/Projects/GPT_RAG/src/gpt_rag/gui_worker.py)
+Entry point: [src/gpt_rag/gui_worker.py](../src/gpt_rag/gui_worker.py)
 
 Supported job kinds:
 
