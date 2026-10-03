@@ -20,7 +20,7 @@ A personal, local-only Retrieval-Augmented Generation scaffold for macOS. Ingest
 ### Prerequisites
 - macOS, Python 3.11+
 - [Ollama](https://ollama.com/) installed and running with an embedding model pulled
-- Node.js 18+ and Rust (for the desktop GUI only)
+- Node.js 20.19+ (20.x), 22.12+ (22.x), or 24+, and Rust (for the desktop GUI only)
 
 ### Installation
 ```bash
@@ -47,6 +47,10 @@ rag ask "What did I write about distributed systems?"
 | Desktop shell | Tauri v2 + React + TypeScript |
 | Desktop API | FastAPI + Uvicorn |
 | Validation | Pydantic v2 |
+
+## Developer verification
+
+See [developer verification](docs/VERIFICATION.md) for fixture-only Python checks, desktop tests/builds, prerequisites, and separate runtime/native lanes.
 
 ## License
 
