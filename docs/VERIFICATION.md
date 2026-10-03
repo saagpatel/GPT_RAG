@@ -12,7 +12,7 @@ python -m pytest tests/test_answer_generation.py -q
 python -m ruff check src tests
 ```
 
-Use a relevant `tests/test_*.py` file or `-k` filter for the changed behavior. The broader source test suite is `python -m pytest`; CI uses this pip-installed development environment. `python -m ruff format --check src tests` checks formatting without rewriting files. For a package-build check, use `python -m pip wheel --no-deps --wheel-dir dist .`; this builds a wheel and may download build dependencies.
+Use a relevant `tests/test_*.py` file or `-k` filter for the changed behavior. The broader source test suite is `python -m pytest`; CI attempts this development install but permits fallback to a base install. `python -m ruff format --check src tests` checks formatting without rewriting files. For a package-build check, use `python -m pip wheel --no-deps --wheel-dir dist .`; this builds a wheel and may download build dependencies.
 
 There is no committed Python `uv.lock` in the current source. If a machine-local `.codex/verify.commands` harness is present, inspect its additional gates before running it. Its `--locked` setup requires an existing local lock: in a fresh disposable checkout, first run `uv lock`, then `uv sync --extra dev --locked`. Preserve an existing foreign lock rather than replacing it. Generating a local lock is dependency resolution, not proof that a dependency update or live runtime is ready.
 
