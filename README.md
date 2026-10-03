@@ -20,7 +20,7 @@ A personal, local-only Retrieval-Augmented Generation scaffold for macOS. Ingest
 ### Prerequisites
 - macOS, Python 3.11+
 - [Ollama](https://ollama.com/) installed and running with an embedding model pulled
-- Node.js 20.19+ (20.x) or 22.12+, and Rust (for the desktop GUI only)
+- Node.js 20.19+ (20.x), 22.12+ (22.x), or 24+, and Rust (for the desktop GUI only)
 
 ### Installation
 ```bash

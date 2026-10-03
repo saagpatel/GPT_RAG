@@ -20,7 +20,7 @@ There is no committed Python `uv.lock` in the current source. If a machine-local
 
 ## Desktop lanes
 
-The committed desktop lock uses Vite 8: use Node 20.19+ on the 20.x line, or Node 22.12+; Node 18 is insufficient. npm installs use `apps/desktop/package-lock.json`.
+The committed desktop lock uses Vite 8: use Node 20.19+ on the 20.x line, Node 22.12+ on the 22.x line, or Node 24+. These versions also satisfy the locked Vitest engine; Node 18 is insufficient. npm installs use `apps/desktop/package-lock.json`.
 
 ```bash
 npm --prefix apps/desktop ci
