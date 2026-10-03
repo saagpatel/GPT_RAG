@@ -28,11 +28,13 @@ Build a personal, local-only RAG system for macOS with a CLI-first workflow. The
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[dev,reranker]"
 rag doctor
 rag runtime-check
 rag init
 ```
+
+`runtime-check` requires local Ollama embedding and generator models plus a cached reranker model (defaults: `qwen3-embedding:4b`, `qwen3:8b`, and `Qwen/Qwen3-Reranker-4B`).
 
 ## How to run tests
 
@@ -40,7 +42,7 @@ rag init
 pytest
 ```
 
-## How to lint and format
+## How to lint and apply lint auto-fixes
 
 ```bash
 ruff check .
@@ -91,7 +93,7 @@ ruff check . --fix
 - Use computer use only for GUI-only macOS/Tauri behavior that cannot be verified through tests, browser tooling, MCP, or CLI commands.
 - Use artifacts for reusable evaluation notes, retrieval examples, screenshots, and handoff packets.
 - Keep connectors read-first and task-scoped. Do not introduce cloud services, hosted databases, external API keys, or connector-backed app behavior unless explicitly requested.
-- Keep `.codex/verify.commands` as the verification authority; Codex App tools add evidence but do not replace the required local gates.
+- Use `docs/VERIFICATION.md` for the committed verification commands. If a machine-local `.codex/verify.commands` harness is present, inspect its additional gates; Codex App tools do not replace the required local gates.
 
 ## Done criteria
 
@@ -121,7 +123,7 @@ Portfolio truth currently marks this project as `recent` with `boilerplate` cont
 | CLI | Typer + Rich |
 | Database | SQLite (FTS5) + LanceDB |
 | Embeddings / inference | Ollama |
-| Reranker | sentence-transformers (Qwen3-Reranker-4B) |
+| Reranker | transformers (Qwen3-Reranker-4B); sentence-transformers for other cross-encoders |
 | Document parsing | pypdf, BeautifulSoup4 |
 | Desktop shell | Tauri v2 + React + TypeScript |
 | Desktop API | FastAPI + Uvicorn |
